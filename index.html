@@ -11,6 +11,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            transition: 0.3s;
         }
 
         .container {
@@ -19,6 +20,7 @@
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
             width: 300px;
+            transition: 0.3s;
         }
 
         h1 {
@@ -49,6 +51,41 @@
             font-weight: bold;
             text-align: center;
         }
+
+        .gender {
+            margin-top: 10px;
+        }
+
+        .toggle {
+            margin-top: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 🌙 TRYB NOCNY */
+        .dark-mode {
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        .dark-mode .container {
+            background: #2c2c2c;
+        }
+
+        .dark-mode input {
+            background: #444;
+            color: white;
+            border: 1px solid #666;
+        }
+
+        .dark-mode button {
+            background: #28a745;
+        }
+
+        .dark-mode button:hover {
+            background: #1e7e34;
+        }
     </style>
 </head>
 <body>
@@ -62,18 +99,28 @@
     <label>Wzrost (cm):</label>
     <input type="number" id="height" placeholder="np. 175">
 
+    <div class="gender">
+        <label><input type="radio" name="gender" value="male"> Mężczyzna</label><br>
+        <label><input type="radio" name="gender" value="female"> Kobieta</label>
+    </div>
+
     <button onclick="calculateBMI()">Oblicz BMI</button>
 
     <div class="result" id="result"></div>
+
+    <div class="toggle" onclick="toggleDarkMode()">
+        🌙 Przełącz tryb nocny
+    </div>
 </div>
 
 <script>
 function calculateBMI() {
     const weight = document.getElementById('weight').value;
     const height = document.getElementById('height').value / 100;
+    const gender = document.querySelector('input[name="gender"]:checked');
 
-    if (!weight || !height) {
-        document.getElementById('result').innerText = "Wpisz poprawne dane!";
+    if (!weight || !height || !gender) {
+        document.getElementById('result').innerText = "Wpisz wszystkie dane!";
         return;
     }
 
@@ -91,7 +138,11 @@ function calculateBMI() {
     }
 
     document.getElementById('result').innerText = 
-        `Twoje BMI: ${bmi} (${category})`;
+        `Płeć: ${gender.value === 'male' ? 'Mężczyzna' : 'Kobieta'} | BMI: ${bmi} (${category})`;
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
 }
 </script>
 
