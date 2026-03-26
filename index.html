@@ -29,19 +29,6 @@
             color: #2c3e50;
         }
 
-        .images {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .images img {
-            width: 60px;
-            height: 80px;
-            object-fit: contain;
-        }
-
         input, button {
             width: 100%;
             padding: 12px;
@@ -73,7 +60,6 @@
             min-height: 60px;
         }
 
-        /* Skala BMI z animowaną strzałką */
         .bmi-gauge {
             position: relative;
             margin: 25px auto;
@@ -83,7 +69,6 @@
 
         .gauge-img {
             width: 100%;
-            height: auto;
         }
 
         .needle {
@@ -94,7 +79,7 @@
             height: 70px;
             background: #2c3e50;
             transform-origin: bottom center;
-            transform: rotate(-90deg); /* startowa pozycja */
+            transform: rotate(-90deg);
             transition: transform 1.2s ease-out;
             border-radius: 3px;
             box-shadow: 0 0 8px rgba(0,0,0,0.3);
@@ -112,6 +97,16 @@
             border-radius: 50%;
         }
 
+        .bottom-image {
+            margin-top: 20px;
+        }
+
+        .bottom-image img {
+            width: 100%;
+            max-width: 320px;
+            transition: 0.3s;
+        }
+
         .dark-mode {
             background: #1e1e1e;
             color: #fff;
@@ -126,13 +121,6 @@
 
 <div class="container">
     <h1>Kalkulator BMI</h1>
-
-    <!-- Obrazki BMI -->
-    <div class="images">
-        <img src="bmi1.png" alt="Skala sylwetek">
-        <img src="bmi2.png" alt="Skala kolorowa">
-        <img src="bmi3.png" alt="Logo BMI">
-    </div>
 
     <label><strong>Waga (kg):</strong></label>
     <input type="number" id="weight" placeholder="np. 75">
@@ -149,13 +137,18 @@
 
     <div class="result" id="result"></div>
 
-    <!-- Animowana skala BMI -->
+    <!-- Skala -->
     <div class="bmi-gauge">
-        <img src="bmi2.png" class="gauge-img" alt="Skala BMI">
+        <img src="bmi2.png" class="gauge-img">
         <div class="needle" id="needle"></div>
     </div>
 
-    <div class="toggle" onclick="toggleDarkMode()" style="margin-top:15px; cursor:pointer; font-size:14px;">
+    <!-- Dynamiczny obraz -->
+    <div class="bottom-image">
+        <img id="bmiImage" src="bmi1_2.png">
+    </div>
+
+    <div onclick="toggleDarkMode()" style="margin-top:15px; cursor:pointer; font-size:14px;">
         🌙 Przełącz tryb nocny
     </div>
 </div>
@@ -195,9 +188,10 @@ function calculateBMI() {
         color = "#e74c3c";
     }
 
-    // Animacja strzałki
     const angle = calculateNeedleAngle(bmi);
     document.getElementById('needle').style.transform = `rotate(${angle}deg)`;
+
+    updateBMIImage(bmi);
 
     document.getElementById('result').innerHTML = `
         <span style="color:${color}; font-size:20px;">
@@ -208,19 +202,30 @@ function calculateBMI() {
     `;
 }
 
-// Oblicza kąt strzałki (od -90° do +90°)
 function calculateNeedleAngle(bmi) {
-    // BMI od 15 do 40 → kąt od -80° do +80°
     const minBMI = 15;
     const maxBMI = 40;
     const minAngle = -80;
     const maxAngle = 80;
 
     let angle = minAngle + ((bmi - minBMI) / (maxBMI - minBMI)) * (maxAngle - minAngle);
-    
-    // Ograniczenie zakresu
-    angle = Math.max(minAngle, Math.min(maxAngle, angle));
-    return angle;
+    return Math.max(minAngle, Math.min(maxAngle, angle));
+}
+
+function updateBMIImage(bmi) {
+    const img = document.getElementById('bmiImage');
+
+    if (bmi < 18.5) {
+        img.src = "bmi1_1.png";
+    } else if (bmi < 25) {
+        img.src = "bmi1_2.png";
+    } else if (bmi < 30) {
+        img.src = "bmi1_3.png";
+    } else if (bmi < 35) {
+        img.src = "bmi1_4.png";
+    } else {
+        img.src = "bmi1_5.png";
+    }
 }
 
 function toggleDarkMode() {
@@ -230,3 +235,4 @@ function toggleDarkMode() {
 
 </body>
 </html>
+
