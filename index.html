@@ -10,29 +10,45 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            margin: 0;
             transition: 0.3s;
         }
 
         .container {
             background: white;
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            width: 300px;
-            transition: 0.3s;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 380px;
+            text-align: center;
         }
 
         h1 {
-            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .images {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .images img {
+            width: 60px;
+            height: 80px;
+            object-fit: contain;
         }
 
         input, button {
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 16px;
         }
 
         button {
@@ -40,6 +56,8 @@
             color: white;
             border: none;
             cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -47,23 +65,53 @@
         }
 
         .result {
-            margin-top: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
             font-weight: bold;
-            text-align: center;
+            font-size: 18px;
+            min-height: 60px;
         }
 
-        .gender {
-            margin-top: 10px;
+        /* Skala BMI z animowaną strzałką */
+        .bmi-gauge {
+            position: relative;
+            margin: 25px auto;
+            width: 280px;
+            height: 140px;
         }
 
-        .toggle {
-            margin-top: 15px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 14px;
+        .gauge-img {
+            width: 100%;
+            height: auto;
         }
 
-        /* 🌙 TRYB NOCNY */
+        .needle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 70px;
+            background: #2c3e50;
+            transform-origin: bottom center;
+            transform: rotate(-90deg); /* startowa pozycja */
+            transition: transform 1.2s ease-out;
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+
+        .needle::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 18px;
+            background: #e74c3c;
+            border-radius: 50%;
+        }
+
         .dark-mode {
             background: #1e1e1e;
             color: #fff;
@@ -72,20 +120,6 @@
         .dark-mode .container {
             background: #2c2c2c;
         }
-
-        .dark-mode input {
-            background: #444;
-            color: white;
-            border: 1px solid #666;
-        }
-
-        .dark-mode button {
-            background: #28a745;
-        }
-
-        .dark-mode button:hover {
-            background: #1e7e34;
-        }
     </style>
 </head>
 <body>
@@ -93,14 +127,21 @@
 <div class="container">
     <h1>Kalkulator BMI</h1>
 
-    <label>Waga (kg):</label>
-    <input type="number" id="weight" placeholder="np. 70">
+    <!-- Obrazki BMI -->
+    <div class="images">
+        <img src="bmi1.png" alt="Skala sylwetek">
+        <img src="bmi2.png" alt="Skala kolorowa">
+        <img src="bmi3.png" alt="Logo BMI">
+    </div>
 
-    <label>Wzrost (cm):</label>
+    <label><strong>Waga (kg):</strong></label>
+    <input type="number" id="weight" placeholder="np. 75">
+
+    <label><strong>Wzrost (cm):</strong></label>
     <input type="number" id="height" placeholder="np. 175">
 
     <div class="gender">
-        <label><input type="radio" name="gender" value="male"> Mężczyzna</label><br>
+        <label><input type="radio" name="gender" value="male" checked> Mężczyzna</label><br>
         <label><input type="radio" name="gender" value="female"> Kobieta</label>
     </div>
 
@@ -108,37 +149,78 @@
 
     <div class="result" id="result"></div>
 
-    <div class="toggle" onclick="toggleDarkMode()">
+    <!-- Animowana skala BMI -->
+    <div class="bmi-gauge">
+        <img src="bmi2.png" class="gauge-img" alt="Skala BMI">
+        <div class="needle" id="needle"></div>
+    </div>
+
+    <div class="toggle" onclick="toggleDarkMode()" style="margin-top:15px; cursor:pointer; font-size:14px;">
         🌙 Przełącz tryb nocny
     </div>
 </div>
 
 <script>
 function calculateBMI() {
-    const weight = document.getElementById('weight').value;
-    const height = document.getElementById('height').value / 100;
+    const weight = parseFloat(document.getElementById('weight').value);
+    const heightCm = parseFloat(document.getElementById('height').value);
     const gender = document.querySelector('input[name="gender"]:checked');
 
-    if (!weight || !height || !gender) {
-        document.getElementById('result').innerText = "Wpisz wszystkie dane!";
+    if (!weight || !heightCm || !gender) {
+        document.getElementById('result').innerHTML = 
+            `<span style="color:red;">Wpisz wagę, wzrost i wybierz płeć!</span>`;
         return;
     }
 
-    const bmi = (weight / (height * height)).toFixed(2);
+    const heightM = heightCm / 100;
+    const bmi = (weight / (heightM * heightM)).toFixed(2);
+
     let category = "";
+    let color = "";
 
     if (bmi < 18.5) {
         category = "Niedowaga";
+        color = "#3498db";
     } else if (bmi < 25) {
         category = "Waga prawidłowa";
+        color = "#27ae60";
     } else if (bmi < 30) {
         category = "Nadwaga";
-    } else {
+        color = "#f1c40f";
+    } else if (bmi < 35) {
         category = "Otyłość";
+        color = "#e67e22";
+    } else {
+        category = "Otyłość skrajna";
+        color = "#e74c3c";
     }
 
-    document.getElementById('result').innerText = 
-        `Płeć: ${gender.value === 'male' ? 'Mężczyzna' : 'Kobieta'} | BMI: ${bmi} (${category})`;
+    // Animacja strzałki
+    const angle = calculateNeedleAngle(bmi);
+    document.getElementById('needle').style.transform = `rotate(${angle}deg)`;
+
+    document.getElementById('result').innerHTML = `
+        <span style="color:${color}; font-size:20px;">
+            Twoje BMI: <strong>${bmi}</strong><br>
+            ${category}
+        </span><br>
+        <small>Płeć: ${gender.value === 'male' ? 'Mężczyzna' : 'Kobieta'}</small>
+    `;
+}
+
+// Oblicza kąt strzałki (od -90° do +90°)
+function calculateNeedleAngle(bmi) {
+    // BMI od 15 do 40 → kąt od -80° do +80°
+    const minBMI = 15;
+    const maxBMI = 40;
+    const minAngle = -80;
+    const maxAngle = 80;
+
+    let angle = minAngle + ((bmi - minBMI) / (maxBMI - minBMI)) * (maxAngle - minAngle);
+    
+    // Ograniczenie zakresu
+    angle = Math.max(minAngle, Math.min(maxAngle, angle));
+    return angle;
 }
 
 function toggleDarkMode() {
